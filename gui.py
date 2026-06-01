@@ -217,6 +217,7 @@ class AppWindow:
 # ─────────────────────────────────────────────
 
 def launch():
+    AddressBookDB()  # ensures tables are created first
     seed_default_admin()
 
     def open_app():
