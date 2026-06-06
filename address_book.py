@@ -137,15 +137,14 @@ class AddressBookDB:
 
     def _init_db(self):
         with self._connect() as conn:
+            # Ajoutez cette requête à la suite des autres CREATE TABLE existantes
             conn.execute("""
-                CREATE TABLE IF NOT EXISTS contacts (
+                CREATE TABLE IF NOT EXISTS appointments (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
-                    email TEXT UNIQUE NOT NULL,
-                    phone TEXT NOT NULL,
-                    category TEXT DEFAULT 'General',
-                    address TEXT DEFAULT '',
-                    company TEXT DEFAULT ''
+                    date TEXT NOT NULL,
+                    time_slot TEXT NOT NULL,
+                    patient_email TEXT NOT NULL,
+                    UNIQUE(date, time_slot)
                 )
             """)
             conn.execute("""
@@ -238,3 +237,19 @@ class AddressBookDB:
             for c in contacts:
                 writer.writerow([c.name, c.email, c.phone])
         return True, f"Exported {len(contacts)} contacts to {path}"
+    def get_booked_slots(self, date_str):
+        """Récupère tous les créneaux déjà réservés pour une date donnée"""
+        with self._connect() as conn:
+            rows = conn.execute("SELECT time_slot FROM appointments WHERE date = ?", (date_str,)).fetchall()
+        return [r[0] for r in rows]
+
+    def book_appointment(self, date_str, time_slot, email):
+        """Enregistre un nouveau rendez-vous dans la base SQLite"""
+        try:
+            with self._connect() as conn:
+                conn.execute("INSERT INTO appointments (date, time_slot, patient_email) VALUES (?, ?, ?)",
+                             (date_str, time_slot, email.lower()))
+                conn.commit()
+            return True, "Rendez-vous programmé avec succès !"
+        except sqlite3.IntegrityError:
+            return False, "Ce créneau est déjà réservé."
