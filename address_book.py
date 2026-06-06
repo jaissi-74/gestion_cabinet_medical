@@ -183,16 +183,52 @@ class AddressBookDB:
 
     def display_contacts(self):
         with self._connect() as conn:
-            rows = conn.execute("SELECT name, email, phone, category FROM contacts ORDER BY name").fetchall()
-        return [Contact(r[0], r[1], r[2]) for r in rows]
+            # 1. On sélectionne TOUTES les colonnes de la table SQL
+            rows = conn.execute("SELECT name, email, phone, category, address, company FROM contacts ORDER BY name").fetchall()
+        
+        contacts_complets = []
+        for r in rows:
+            # 2. On crée le contact de base
+            c = Contact(r[0], r[1], r[2])
+            # 3. On lui ré-attache ses informations supplémentaires de la BDD
+            c.category = r[3]
+            c.address = r[4]
+            c.company = r[5]
+            contacts_complets.append(c)
+            
+        return contacts_complets
 
     def search(self, query):
         with self._connect() as conn:
+            # Même chose ici pour la recherche : on prend tout !
             rows = conn.execute(
-                "SELECT name, email, phone FROM contacts WHERE name LIKE ? OR email LIKE ?",
+                "SELECT name, email, phone, category, address, company FROM contacts WHERE name LIKE ? OR email LIKE ?",
                 (f"%{query}%", f"%{query}%")
             ).fetchall()
-        return [Contact(r[0], r[1], r[2]) for r in rows]
+            
+        contacts_complets = []
+        for r in rows:
+            c = Contact(r[0], r[1], r[2])
+            c.category = r[3]
+            c.address = r[4]
+            c.company = r[5]
+            contacts_complets.append(c)
+            
+        return contacts_complets
+    
+    def update_contact(self, name, email, phone, category='General', address='', company=''):
+        """Met à jour les informations d'un contact existant via son email (clé unique)"""
+        try:
+            with self._connect() as conn:
+                conn.execute("""
+                    UPDATE contacts 
+                    SET name = ?, phone = ?, category = ?, address = ?, company = ?
+                    WHERE email = ?
+                """, (name, phone, category, address, company, email.lower()))
+                conn.commit()
+            return True, "Contact mis à jour avec succès."
+        except sqlite3.Error as e:
+            return False, f"Erreur lors de la modification : {e}"
 
     def export_csv(self, path="db_export.csv"):
         contacts = self.display_contacts()

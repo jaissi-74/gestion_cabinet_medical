@@ -1,11 +1,10 @@
 import tkinter as tk
-from tkinter import ttk, messagebox, simpledialog
+from tkinter import ttk, messagebox
 from address_book import AddressBookDB
-from auth import verify_admin, seed_default_admin, create_admin
-
+from auth import verify_admin, seed_default_admin
 
 # ─────────────────────────────────────────────
-#  LOGIN WINDOW  (Part 4)
+#  LOGIN WINDOW
 # ─────────────────────────────────────────────
 
 class LoginWindow:
@@ -50,7 +49,7 @@ class LoginWindow:
 
 
 # ─────────────────────────────────────────────
-#  MAIN APPLICATION WINDOW  (Parts 3, 8)
+#  MAIN APPLICATION WINDOW
 # ─────────────────────────────────────────────
 
 CATEGORIES = ["General", "Patient", "Fournisseur", "Laboratoire", "Client", "Collègue"]
@@ -60,14 +59,11 @@ class AppWindow:
         self.book = AddressBookDB()
         self.root = tk.Tk()
         self.root.title("Carnet d'adresses — Gestion des contacts")
-        self.root.geometry("800x560")
+        self.root.geometry("850x560")  # Légèrement élargi pour accommoder le nouveau bouton
         self._build()
         self._refresh_list()
 
-    # ── Layout ──────────────────────────────
-
     def _build(self):
-        # ── frameH: top bar
         frameH = tk.Frame(self.root, bg="#0052CC", pady=8)
         frameH.pack(fill="x")
         tk.Label(frameH, text="📋  Carnet d'adresses",
@@ -75,11 +71,9 @@ class AppWindow:
         tk.Label(frameH, text="Base de données SQLite",
                  bg="#0052CC", fg="#cce0ff", font=("Arial", 10)).pack(side="right", padx=16)
 
-        # ── Main content (left form + right list)
         content = tk.Frame(self.root)
         content.pack(fill="both", expand=True, padx=10, pady=8)
 
-        # ── Left: form panel
         form_frame = tk.LabelFrame(content, text="Contact", padx=10, pady=10)
         form_frame.pack(side="left", fill="y", padx=(0, 8))
 
@@ -94,20 +88,25 @@ class AppWindow:
         tk.Label(form_frame, text="Catégorie :").grid(row=len(labels), column=0, sticky="w", pady=3)
         self.cat_var = tk.StringVar(value="General")
         ttk.Combobox(form_frame, textvariable=self.cat_var,
-                     values=CATEGORIES, state="readonly", width=21).grid(
-            row=len(labels), column=1, pady=3)
+                     values=CATEGORIES, state="readonly", width=21).grid(row=len(labels), column=1, pady=3)
 
-        # ── Buttons row
+        # ── Zone des boutons inférieure
         btn_frame = tk.Frame(form_frame)
         btn_frame.grid(row=len(labels)+1, column=0, columnspan=2, pady=10)
-        tk.Button(btn_frame, text="Ajouter",    width=10, bg="#28a745", fg="white",
-                  command=self._add).pack(side="left", padx=4)
-        tk.Button(btn_frame, text="Supprimer",  width=10, bg="#dc3545", fg="white",
-                  command=self._remove).pack(side="left", padx=4)
-        tk.Button(btn_frame, text="Effacer",    width=10,
-                  command=self._clear_form).pack(side="left", padx=4)
+        
+        tk.Button(btn_frame, text="Ajouter",    width=8, bg="#28a745", fg="white",
+                  command=self._add).pack(side="left", padx=2)
+        tk.Button(btn_frame, text="Supprimer",  width=8, bg="#dc3545", fg="white",
+                  command=self._remove).pack(side="left", padx=2)
+        tk.Button(btn_frame, text="Modifier",   width=8, bg="#ffc107", fg="black",
+                  command=self._update).pack(side="left", padx=2)
+        # Nouveau bouton "Afficher" demandé pour charger toutes les informations
+        tk.Button(btn_frame, text="Afficher",   width=8, bg="#17a2b8", fg="white",
+                  command=self._display_details).pack(side="left", padx=2)
+                  
+        tk.Button(btn_frame, text="Effacer",    width=8,
+                  command=self._clear_form).pack(side="left", padx=2)
 
-        # ── Search
         search_frame = tk.Frame(form_frame)
         search_frame.grid(row=len(labels)+2, column=0, columnspan=2, pady=4)
         tk.Label(search_frame, text="Recherche :").pack(side="left")
@@ -116,11 +115,9 @@ class AppWindow:
         tk.Button(search_frame, text="🔍", command=self._search).pack(side="left")
         tk.Button(search_frame, text="✕", command=self._refresh_list).pack(side="left")
 
-        # ── Export
         tk.Button(form_frame, text="Exporter en CSV", width=24,
                   command=self._export).grid(row=len(labels)+3, column=0, columnspan=2, pady=6)
 
-        # ── Right: contact list (frameM + frameB)
         right = tk.Frame(content)
         right.pack(side="left", fill="both", expand=True)
 
@@ -159,6 +156,31 @@ class AppWindow:
             self._refresh_list()
         messagebox.showinfo("Résultat", msg)
 
+    def _update(self):
+        """Action du bouton Modifier : met à jour le contact en prenant l'email comme référence"""
+        name    = self.entries["Nom"].get().strip()
+        email   = self.entries["Email"].get().strip()  # L'email sert d'identifiant unique
+        phone   = self.entries["Téléphone"].get().strip()
+        address = self.entries["Adresse"].get().strip()
+        company = self.entries["Entreprise"].get().strip()
+        cat     = self.cat_var.get()
+
+        if not email:
+            messagebox.showwarning("Email manquant", "L'email est obligatoire pour identifier le contact à modifier.")
+            return
+
+        if not name or not phone:
+            messagebox.showwarning("Champs manquants", "Le nom et le téléphone ne peuvent pas être vides.")
+            return
+
+        # Appel de la fonction de mise à jour
+        ok, msg = self.book.update_contact(name, email, phone, cat, address, company)
+        if ok:
+            self._refresh_list()  # Actualise la liste de droite
+            messagebox.showinfo("Succès", msg)
+        else:
+            messagebox.showerror("Erreur", msg)
+    
     def _remove(self):
         sel = self.listbox.curselection()
         if not sel:
@@ -170,6 +192,38 @@ class AppWindow:
             ok, msg = self.book.remove_contact(email)
             self._refresh_list()
             messagebox.showinfo("Résultat", msg)
+
+    def _display_details(self):
+        """Action du bouton Afficher : remplit le formulaire avec l'intégralité des données SQLite"""
+        sel = self.listbox.curselection()
+        if not sel:
+            messagebox.showwarning("Sélection", "Veuillez sélectionner un contact dans la liste d'abord.")
+            return
+        
+        item = self.listbox.get(sel[0])
+        email = item.split("|")[1].strip()
+        
+        # Récupération de la liste complète pour chercher l'objet en profondeur
+        all_contacts = self.book.display_contacts()
+        contact_complet = next((c for c in all_contacts if c.email.lower() == email.lower()), None)
+        
+        if contact_complet:
+            # Remplissage complet du formulaire à gauche
+            self.entries["Nom"].set(contact_complet.name)
+            self.entries["Email"].set(contact_complet.email)
+            self.entries["Téléphone"].set(contact_complet.phone)
+            
+            # Injection sécurisée des attributs dynamiques (s'ils existent dans l'objet)
+            self.entries["Adresse"].set(getattr(contact_complet, 'address', ''))
+            self.entries["Entreprise"].set(getattr(contact_complet, 'company', ''))
+            
+            cat = getattr(contact_complet, 'category', 'General')
+            if cat in CATEGORIES:
+                self.cat_var.set(cat)
+            else:
+                self.cat_var.set("General")
+        else:
+            messagebox.showerror("Erreur", "Impossible de charger les détails complets.")
 
     def _search(self):
         q = self.search_var.get().strip()
@@ -189,15 +243,8 @@ class AppWindow:
         self.count_label.config(text=f"{len(contacts)} contact(s)")
 
     def _on_select(self, event):
-        sel = self.listbox.curselection()
-        if not sel:
-            return
-        item = self.listbox.get(sel[0])
-        parts = [p.strip() for p in item.split("|")]
-        if len(parts) >= 3:
-            self.entries["Nom"].set(parts[0].strip())
-            self.entries["Email"].set(parts[1])
-            self.entries["Téléphone"].set(parts[2])
+        # Laissé vide pour que le remplissage complet soit déclenché par le bouton "Afficher"
+        pass
 
     def _clear_form(self):
         for var in self.entries.values():
@@ -217,7 +264,7 @@ class AppWindow:
 # ─────────────────────────────────────────────
 
 def launch():
-    AddressBookDB()  # ensures tables are created first
+    AddressBookDB()  # Initialise le fichier de base de données contacts.db
     seed_default_admin()
 
     def open_app():
