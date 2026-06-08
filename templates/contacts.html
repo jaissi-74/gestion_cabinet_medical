@@ -7,6 +7,12 @@
     <p>Gestion des patients, fournisseurs, laboratoires, clients et collègues.</p>
   </div>
   <a class="btn" href="{{ url_for('add_contact') }}">+ Ajouter un contact</a>
+ 
+
+        <a class="btn export-btn" href="{{ url_for('export_csv') }}">
+            📄 Export CSV
+        </a>
+    
 </section>
 
 <section class="card">
