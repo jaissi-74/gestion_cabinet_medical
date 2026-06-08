@@ -3,24 +3,28 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Gestion Contacts</title>
+  <title>{% block title %}Gestionnaire de Cabinet Médical{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <nav class="navbar">
-    <div class="brand">Gestion Contacts</div>
-    <div>
+  <header class="navbar">
+    <div class="brand">📋 Gestionnaire de Contacts</div>
+    <nav>
       <a href="{{ url_for('contacts') }}">Contacts</a>
       <a href="{{ url_for('rdv') }}">RDV</a>
-      <a href="{{ url_for('logout') }}">Déconnexion</a>
-    </div>
-  </nav>
+      <a href="{{ url_for('logout') }}" class="logout">Déconnexion</a>
+    </nav>
+  </header>
+
   <main class="container">
     {% with messages = get_flashed_messages(with_categories=true) %}
-      {% for category, message in messages %}
-        <div class="alert {{ category }}">{{ message }}</div>
-      {% endfor %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
     {% endwith %}
+
     {% block content %}{% endblock %}
   </main>
 </body>
