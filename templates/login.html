@@ -3,30 +3,46 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Connexion — Administrateur</title>
+  <title>Connexion — Cabinet Médical</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="login-page">
+
+  <div class="login-bg-accent"></div>
+  <div class="login-bg-accent2"></div>
+
   <form class="login-card" method="post">
-    <h1>Carnet d'adresses</h1>
-    <p class="subtitle">Connexion administrateur</p>
+    <div class="login-logo">🏥</div>
+    <h1>Cabinet Médical</h1>
+    <p class="login-subtitle">Connectez-vous à votre espace administrateur</p>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
-          <div class="alert {{ category }}">{{ message }}</div>
+          <div class="alert {{ category }}" style="margin-bottom:16px;">{{ message }}</div>
         {% endfor %}
       {% endif %}
     {% endwith %}
 
-    <label>Utilisateur</label>
-    <input type="text" name="username" placeholder="admin" required>
+    <div class="login-field">
+      <label>Identifiant</label>
+      <input type="text" name="username" placeholder="admin" autocomplete="username" required>
+    </div>
 
-    <label>Mot de passe</label>
-    <input type="password" name="password" placeholder="********" required>
+    <div class="login-field">
+      <label>Mot de passe</label>
+      <input type="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
+    </div>
 
-    <button type="submit" class="btn full">Se connecter</button>
-    <p class="hint">Identifiants par défaut : <strong>admin / admin123</strong></p>
+    <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:12px; font-size:14px; margin-top:8px;">
+      Se connecter
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </button>
+
+    <p class="login-hint" style="margin-top:20px;">
+      Identifiants par défaut : <strong style="color:var(--text-muted);">admin / admin123</strong>
+    </p>
   </form>
+
 </body>
 </html>
