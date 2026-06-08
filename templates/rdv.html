@@ -1,75 +1,117 @@
 {% extends 'base.html' %}
-{% block title %}RDV — Cabinet Médical{% endblock %}
+{% block title %}Rendez-vous — Cabinet Médical{% endblock %}
+{% block topbar_title %}Agenda & Rendez-vous{% endblock %}
+
 {% block content %}
-<section class="page-header">
-  <div>
-    <h1>Agenda & Planification des RDV</h1>
-    <p>Gestion des rendez-vous liés aux contacts.</p>
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>Agenda & Rendez-vous</h1>
+    <p>Planifiez et gérez les rendez-vous de vos contacts.</p>
   </div>
-</section>
+</div>
 
-<form class="card form-grid" method="post">
-  <div class="field">
-    <label>Contact</label>
-    <select name="contact_id" required>
-      {% for c in contacts %}
-        <option value="{{ c[0] }}">{{ c[1] }}</option>
-      {% endfor %}
-    </select>
+<!-- New RDV form -->
+<div class="card">
+  <div style="margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border);">
+    <p style="font-size: 13px; font-weight: 700; color: var(--text); letter-spacing:.01em;">
+      Planifier un nouveau rendez-vous
+    </p>
   </div>
 
-  <div class="field">
-    <label>Date du RDV</label>
-    <input type="date" name="date_rdv" required>
-  </div>
+  <form class="form-grid" method="post">
 
-  <div class="field">
-    <label>Créneau horaire</label>
-    <select name="heure_rdv" required>
-      {% for slot in ['09:00 - 09:30','09:30 - 10:00','10:00 - 10:30','10:30 - 11:00','11:00 - 11:30','11:30 - 12:00','14:00 - 14:30','14:30 - 15:00','15:00 - 15:30','15:30 - 16:00','16:00 - 16:30','16:30 - 17:00'] %}
-        <option value="{{ slot }}">{{ slot }}</option>
-      {% endfor %}
-    </select>
-  </div>
+    <div class="field">
+      <label>Contact <span class="required-star">*</span></label>
+      <select name="contact_id" required>
+        <option value="" disabled selected>Sélectionner un contact…</option>
+        {% for c in contacts %}
+          <option value="{{ c[0] }}">{{ c[1] }}</option>
+        {% endfor %}
+      </select>
+    </div>
 
-  <div class="field">
-    <label>Motif</label>
-    <input name="motif" placeholder="Consultation, confirmation, demande de résultats...">
-  </div>
+    <div class="field">
+      <label>Date du rendez-vous <span class="required-star">*</span></label>
+      <input type="date" name="date_rdv" required>
+    </div>
 
-  <div class="form-actions full-width">
-    <button type="submit" class="btn">Ajouter RDV</button>
-  </div>
-</form>
+    <div class="field">
+      <label>Créneau horaire <span class="required-star">*</span></label>
+      <select name="heure_rdv" required>
+        <optgroup label="Matin">
+          {% for slot in ['09:00 - 09:30','09:30 - 10:00','10:00 - 10:30','10:30 - 11:00','11:00 - 11:30','11:30 - 12:00'] %}
+            <option value="{{ slot }}">{{ slot }}</option>
+          {% endfor %}
+        </optgroup>
+        <optgroup label="Après-midi">
+          {% for slot in ['14:00 - 14:30','14:30 - 15:00','15:00 - 15:30','15:30 - 16:00','16:00 - 16:30','16:30 - 17:00'] %}
+            <option value="{{ slot }}">{{ slot }}</option>
+          {% endfor %}
+        </optgroup>
+      </select>
+    </div>
 
-<section class="card table-card">
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Contact</th>
-        <th>Date</th>
-        <th>Heure</th>
-        <th>Motif</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for r in rdvs %}
-      <tr>
-        <td>{{ r[0] }}</td>
-        <td class="strong">{{ r[1] }}</td>
-        <td>{{ r[2] }}</td>
-        <td><span class="badge green">{{ r[3] }}</span></td>
-        <td>{{ r[4] or '-' }}</td>
-        <td><a class="danger-link" href="{{ url_for('delete_rdv', id=r[0]) }}" onclick="return confirm('Supprimer ce RDV ?')">Supprimer</a></td>
-      </tr>
-      {% else %}
-      <tr>
-        <td colspan="6" class="empty">Aucun rendez-vous programmé.</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</section>
+    <div class="field">
+      <label>Motif</label>
+      <input name="motif" placeholder="Ex. : Consultation, résultats d'analyses…">
+    </div>
+
+    <div class="form-actions full-width">
+      <button type="submit" class="btn btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Planifier le rendez-vous
+      </button>
+    </div>
+
+  </form>
+</div>
+
+<!-- RDV table -->
+<div class="card" style="padding:0; overflow:hidden;">
+  <div style="padding: 16px 20px 14px; border-bottom: 1px solid var(--border);">
+    <p style="font-size:13px; font-weight:700; color:var(--text);">Rendez-vous planifiés</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:48px; padding-left:20px;">#</th>
+          <th>Contact</th>
+          <th>Date</th>
+          <th>Créneau</th>
+          <th>Motif</th>
+          <th style="padding-right:20px;">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rdvs %}
+        <tr>
+          <td style="padding-left:20px; color:var(--text-light); font-size:12px;">{{ r[0] }}</td>
+          <td class="td-name">{{ r[1] }}</td>
+          <td style="color:var(--text-muted);">
+            <div style="display:flex; align-items:center; gap:7px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              {{ r[2] }}
+            </div>
+          </td>
+          <td><span class="badge badge-blue">{{ r[3] }}</span></td>
+          <td style="color:var(--text-muted); font-size:13px;">{{ r[4] or '—' }}</td>
+          <td style="padding-right:20px;">
+            <a class="link-danger" href="{{ url_for('delete_rdv', id=r[0]) }}" onclick="return confirm('Supprimer ce rendez-vous ?')">Supprimer</a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6">
+            <div class="empty-state">
+              <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <p>Aucun rendez-vous planifié.</p>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}
