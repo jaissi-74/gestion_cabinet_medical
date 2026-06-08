@@ -2,6 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import sqlite3
 import hashlib
 from pathlib import Path
+import csv
+from flask import Response
 
 app = Flask(__name__)
 app.secret_key = "change-this-secret-key"
@@ -117,7 +119,7 @@ def add_contact():
         try:
             cur.execute("""
                 INSERT INTO contacts(name,email,phone,category,adress,company)
-                VALUES(?,?,?,?,?,?,?)
+                VALUES(?,?,?,?,?,?)
             """, data)
             conn.commit()
             flash("Contact ajouté", "success")
@@ -204,6 +206,43 @@ def delete_rdv(id):
     flash("RDV supprimé", "success")
     return redirect(url_for("rdv"))
 
+@app.route("/export_csv")
+def export_csv():
+
+    if not require_login():
+        return redirect(url_for("login"))
+
+    conn = connect()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT name,email,phone,category,address,company
+        FROM contacts
+        ORDER BY name
+    """)
+
+    contacts = cur.fetchall()
+    conn.close()
+
+    output = []
+
+    output.append(
+        "Nom,Email,Téléphone,Catégorie,Adresse,Entreprise\n"
+    )
+
+    for c in contacts:
+        output.append(
+            f"{c[0]},{c[1]},{c[2]},{c[3]},{c[4]},{c[5]}\n"
+        )
+
+    return Response(
+        "".join(output),
+        mimetype="text/csv",
+        headers={
+            "Content-Disposition":
+            "attachment; filename=contacts.csv"
+        }
+    )
 
 if __name__ == "__main__":
     init_db()
