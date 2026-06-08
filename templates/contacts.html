@@ -1,22 +1,62 @@
 {% extends 'base.html' %}
+{% block title %}Contacts — Cabinet Médical{% endblock %}
 {% block content %}
-<div class="top-actions">
-  <h1>Liste des contacts</h1>
-  <a class="btn" href="{{ url_for('add_contact') }}">Ajouter un contact</a>
-</div>
-<form class="search" method="get">
-  <input name="q" placeholder="Rechercher..." value="{{ q }}">
-  <button>Rechercher</button>
-</form>
-<table>
-  <thead><tr><th>ID</th><th>Nom</th><th>Email</th><th>Téléphone</th><th>Catégorie</th><th>Actions</th></tr></thead>
-  <tbody>
-    {% for c in contacts %}
-    <tr>
-      <td>{{ c[0] }}</td><td>{{ c[1] }}</td><td>{{ c[2] }}</td><td>{{ c[3] }}</td><td>{{ c[4] }}</td>
-      <td><a href="{{ url_for('edit_contact', id=c[0]) }}">Modifier</a> | <a href="{{ url_for('delete_contact', id=c[0]) }}" onclick="return confirm('Supprimer ?')">Supprimer</a></td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<section class="page-header">
+  <div>
+    <h1>Liste des Contacts</h1>
+    <p>Gestion des patients, fournisseurs, laboratoires, clients et collègues.</p>
+  </div>
+  <a class="btn" href="{{ url_for('add_contact') }}">+ Ajouter un contact</a>
+</section>
+
+<section class="card">
+  <form class="search-bar" method="get">
+    <input name="q" placeholder="Rechercher par nom, email, téléphone ou catégorie..." value="{{ q }}">
+    <button type="submit">🔍 Rechercher</button>
+    <a class="btn secondary" href="{{ url_for('contacts') }}">Réinitialiser</a>
+  </form>
+</section>
+
+<section class="card table-card">
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nom</th>
+        <th>Email</th>
+        <th>Téléphone</th>
+        <th>Catégorie</th>
+        <th>Adresse</th>
+        <th>Entreprise</th>
+        <th>Communication</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in contacts %}
+      <tr>
+        <td>{{ c[0] }}</td>
+        <td class="strong">{{ c[1] }}</td>
+        <td>{{ c[2] }}</td>
+        <td>{{ c[3] }}</td>
+        <td><span class="badge">{{ c[4] or 'General' }}</span></td>
+        <td>{{ c[5] or '-' }}</td>
+        <td>{{ c[6] or '-' }}</td>
+        <td class="actions small-actions">
+          <a href="mailto:{{ c[2] }}">📧 Email</a>
+          <a target="_blank" href="https://wa.me/{{ c[3]|replace(' ', '')|replace('-', '')|replace('+', '') }}">🟢 WhatsApp</a>
+        </td>
+        <td class="actions">
+          <a href="{{ url_for('edit_contact', id=c[0]) }}">Modifier</a>
+          <a class="danger-link" href="{{ url_for('delete_contact', id=c[0]) }}" onclick="return confirm('Supprimer ce contact ?')">Supprimer</a>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="9" class="empty">Aucun contact enregistré.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
 {% endblock %}
