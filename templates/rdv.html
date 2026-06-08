@@ -1,21 +1,75 @@
 {% extends 'base.html' %}
+{% block title %}RDV — Cabinet Médical{% endblock %}
 {% block content %}
-<h1>Gestion des rendez-vous</h1>
-<form class="card-form" method="post">
-  <select name="contact_id" required>
-    {% for c in contacts %}<option value="{{ c[0] }}">{{ c[1] }}</option>{% endfor %}
-  </select>
-  <input type="date" name="date_rdv" required>
-  <input type="time" name="heure_rdv" required>
-  <input name="motif" placeholder="Motif">
-  <button>Ajouter RDV</button>
+<section class="page-header">
+  <div>
+    <h1>Agenda & Planification des RDV</h1>
+    <p>Gestion des rendez-vous liés aux contacts.</p>
+  </div>
+</section>
+
+<form class="card form-grid" method="post">
+  <div class="field">
+    <label>Contact</label>
+    <select name="contact_id" required>
+      {% for c in contacts %}
+        <option value="{{ c[0] }}">{{ c[1] }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="field">
+    <label>Date du RDV</label>
+    <input type="date" name="date_rdv" required>
+  </div>
+
+  <div class="field">
+    <label>Créneau horaire</label>
+    <select name="heure_rdv" required>
+      {% for slot in ['09:00 - 09:30','09:30 - 10:00','10:00 - 10:30','10:30 - 11:00','11:00 - 11:30','11:30 - 12:00','14:00 - 14:30','14:30 - 15:00','15:00 - 15:30','15:30 - 16:00','16:00 - 16:30','16:30 - 17:00'] %}
+        <option value="{{ slot }}">{{ slot }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="field">
+    <label>Motif</label>
+    <input name="motif" placeholder="Consultation, confirmation, demande de résultats...">
+  </div>
+
+  <div class="form-actions full-width">
+    <button type="submit" class="btn">Ajouter RDV</button>
+  </div>
 </form>
-<table>
-  <thead><tr><th>ID</th><th>Contact</th><th>Date</th><th>Heure</th><th>Motif</th><th>Action</th></tr></thead>
-  <tbody>
-    {% for r in rdvs %}
-    <tr><td>{{ r[0] }}</td><td>{{ r[1] }}</td><td>{{ r[2] }}</td><td>{{ r[3] }}</td><td>{{ r[4] }}</td><td><a href="{{ url_for('delete_rdv', id=r[0]) }}">Supprimer</a></td></tr>
-    {% endfor %}
-  </tbody>
-</table>
+
+<section class="card table-card">
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Contact</th>
+        <th>Date</th>
+        <th>Heure</th>
+        <th>Motif</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rdvs %}
+      <tr>
+        <td>{{ r[0] }}</td>
+        <td class="strong">{{ r[1] }}</td>
+        <td>{{ r[2] }}</td>
+        <td><span class="badge green">{{ r[3] }}</span></td>
+        <td>{{ r[4] or '-' }}</td>
+        <td><a class="danger-link" href="{{ url_for('delete_rdv', id=r[0]) }}" onclick="return confirm('Supprimer ce RDV ?')">Supprimer</a></td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6" class="empty">Aucun rendez-vous programmé.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
 {% endblock %}
