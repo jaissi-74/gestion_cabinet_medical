@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>{{ 'Modifier' if contact else 'Ajouter' }} un contact</h1>
+<form class="card-form" method="post">
+  <input name="nom" placeholder="Nom" value="{{ contact[1] if contact else '' }}" required>
+  <input name="email" placeholder="Email" value="{{ contact[2] if contact else '' }}" required>
+  <input name="telephone" placeholder="Téléphone" value="{{ contact[3] if contact else '' }}" required>
+  <input name="categorie" placeholder="Catégorie" value="{{ contact[4] if contact else '' }}">
+  <input name="adresse" placeholder="Adresse" value="{{ contact[5] if contact else '' }}">
+  <input name="fonction" placeholder="Fonction" value="{{ contact[6] if contact else '' }}">
+  <input name="entreprise" placeholder="Entreprise" value="{{ contact[7] if contact else '' }}">
+  <button>Enregistrer</button>
+</form>
+{% endblock %}

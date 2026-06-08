@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Gestion des rendez-vous</h1>
+<form class="card-form" method="post">
+  <select name="contact_id" required>
+    {% for c in contacts %}<option value="{{ c[0] }}">{{ c[1] }}</option>{% endfor %}
+  </select>
+  <input type="date" name="date_rdv" required>
+  <input type="time" name="heure_rdv" required>
+  <input name="motif" placeholder="Motif">
+  <button>Ajouter RDV</button>
+</form>
+<table>
+  <thead><tr><th>ID</th><th>Contact</th><th>Date</th><th>Heure</th><th>Motif</th><th>Action</th></tr></thead>
+  <tbody>
+    {% for r in rdvs %}
+    <tr><td>{{ r[0] }}</td><td>{{ r[1] }}</td><td>{{ r[2] }}</td><td>{{ r[3] }}</td><td>{{ r[4] }}</td><td><a href="{{ url_for('delete_rdv', id=r[0]) }}">Supprimer</a></td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

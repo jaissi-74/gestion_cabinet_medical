@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Connexion</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="login-page">
+  <form class="login-card" method="post">
+    <h1>Connexion Admin</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="alert {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+    <label>Nom d'utilisateur</label>
+    <input name="username" required>
+    <label>Mot de passe</label>
+    <input type="password" name="password" required>
+    <button>Se connecter</button>
+    <p>Par défaut : admin / admin123</p>
+  </form>
+</body>
+</html>
