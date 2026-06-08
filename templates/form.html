@@ -1,53 +1,67 @@
 {% extends 'base.html' %}
-{% block title %}{{ 'Modifier' if contact else 'Ajouter' }} un contact{% endblock %}
+{% block title %}{{ 'Modifier' if contact else 'Ajouter' }} un contact — Cabinet Médical{% endblock %}
+{% block topbar_title %}{{ 'Modifier' if contact else 'Ajouter' }} un contact{% endblock %}
+
 {% block content %}
-<section class="page-header">
-  <div>
-    <h1>{{ 'Modifier' if contact else 'Ajouter' }} un contact</h1>
-    <p>Remplissez les informations du contact comme dans l'application Tkinter.</p>
+<div class="page-header">
+  <div class="page-header-text">
+    <h1>{{ 'Modifier' if contact else 'Nouveau contact' }}</h1>
+    <p>{{ 'Mise à jour des informations du contact.' if contact else 'Renseignez les informations du nouveau contact.' }}</p>
   </div>
-  <a class="btn secondary" href="{{ url_for('contacts') }}">← Retour</a>
-</section>
+  <div class="page-header-actions">
+    <a class="btn btn-secondary" href="{{ url_for('contacts') }}">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Retour
+    </a>
+  </div>
+</div>
 
-<form class="card form-grid" method="post">
-  <div class="field">
-    <label>Nom *</label>
-    <input name="name" placeholder="Nom complet" value="{{ contact[1] if contact else '' }}" required>
-  </div>
+<div class="card">
+  <form class="form-grid" method="post">
 
-  <div class="field">
-    <label>Email *</label>
-    <input type="email" name="email" placeholder="exemple@email.com" value="{{ contact[2] if contact else '' }}" required>
-  </div>
+    <div class="field">
+      <label>Nom complet <span class="required-star">*</span></label>
+      <input name="name" placeholder="Ex. : Dr. Ahmed Benali" value="{{ contact[1] if contact else '' }}" required>
+    </div>
 
-  <div class="field">
-    <label>Téléphone *</label>
-    <input name="phone" placeholder="06XXXXXXXX" value="{{ contact[3] if contact else '' }}" required>
-  </div>
+    <div class="field">
+      <label>Adresse e-mail <span class="required-star">*</span></label>
+      <input type="email" name="email" placeholder="exemple@email.com" value="{{ contact[2] if contact else '' }}" required>
+    </div>
 
-  <div class="field">
-    <label>Catégorie</label>
-    <select name="category">
-      {% set selected = contact[4] if contact else 'General' %}
-      {% for cat in ['General', 'Patient', 'Fournisseur', 'Laboratoire', 'Client', 'Collègue'] %}
-        <option value="{{ cat }}" {% if selected == cat %}selected{% endif %}>{{ cat }}</option>
-      {% endfor %}
-    </select>
-  </div>
+    <div class="field">
+      <label>Téléphone <span class="required-star">*</span></label>
+      <input name="phone" placeholder="06 XX XX XX XX" value="{{ contact[3] if contact else '' }}" required>
+    </div>
 
-  <div class="field full-width">
-    <label>Adresse</label>
-    <input name="adress" placeholder="Adresse du contact" value="{{ contact[5] if contact else '' }}">
-  </div>
+    <div class="field">
+      <label>Catégorie</label>
+      <select name="category">
+        {% set selected = contact[4] if contact else 'General' %}
+        {% for cat in ['General', 'Patient', 'Fournisseur', 'Laboratoire', 'Client', 'Collègue'] %}
+          <option value="{{ cat }}" {% if selected == cat %}selected{% endif %}>{{ cat }}</option>
+        {% endfor %}
+      </select>
+    </div>
 
-  <div class="field full-width">
-    <label>Entreprise</label>
-    <input name="company" placeholder="Entreprise / Cabinet / Laboratoire" value="{{ contact[6] if contact else '' }}">
-  </div>
+    <div class="field full-width">
+      <label>Adresse</label>
+      <input name="adress" placeholder="Ex. : 12 Rue de la Médecine, Casablanca" value="{{ contact[5] if contact else '' }}">
+    </div>
 
-  <div class="form-actions full-width">
-    <button type="submit" class="btn">Enregistrer</button>
-    <a class="btn secondary" href="{{ url_for('contacts') }}">Annuler</a>
-  </div>
-</form>
+    <div class="field full-width">
+      <label>Entreprise / Cabinet / Organisme</label>
+      <input name="company" placeholder="Ex. : Laboratoire Bio-Santé" value="{{ contact[6] if contact else '' }}">
+    </div>
+
+    <div class="form-actions full-width">
+      <a class="btn btn-secondary" href="{{ url_for('contacts') }}">Annuler</a>
+      <button type="submit" class="btn btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        {{ 'Enregistrer les modifications' if contact else 'Créer le contact' }}
+      </button>
+    </div>
+
+  </form>
+</div>
 {% endblock %}
